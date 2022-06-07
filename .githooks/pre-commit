@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+files=$(git --no-pager diff --name-only --no-color --cached)
+for f in ${files} ; do
+  if [[ -f "${f}" && "${f}" == *.tf ]] ; then
+    old_content=$(cat "${f}")
+    new_content=$(terraform fmt - < "${f}")
+
+    if [[ "${old_content}x" != "${new_content}x" ]] ; then
+      echo "Auto-formatting ${f}"
+      echo -n "${new_content}" > "${f}"
+      git add "${f}"
+    fi
+  fi
+done
